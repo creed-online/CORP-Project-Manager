@@ -1,0 +1,36 @@
+{
+  "name": "corp-project-manager",
+  "version": "1.0.0",
+  "description": "A project management application for beginners.",
+  "keywords": [
+    "backend",
+    "API",
+    "learning",
+    "API",
+    "Creation"
+  ],
+  "homepage": "https://github.com/creed-online/CORP-Project-Manager#readme",
+  "bugs": {
+    "url": "https://github.com/creed-online/CORP-Project-Manager/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/creed-online/CORP-Project-Manager.git"
+  },
+  "license": "ISC",
+  "author": "Varun Kumar Saxena",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
