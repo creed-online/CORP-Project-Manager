@@ -36,3 +36,5 @@ const forgotPasswordMailgenContent = (username, passwordResetURL) => {
         }
     }
 }
+
+export { emamilVerificationMailgenContent, forgotPasswordMailgenContent };
