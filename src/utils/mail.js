@@ -1,4 +1,40 @@
 import Mailgen from "mailgen";
+import nodemailer from "nodemailer";
+
+const sendEmail = async (options) => {
+   const mailGenerator =  new Mailgen({
+        theme: "default",
+        product: {
+            name: "CORP",
+            link: "https://CORP.com/"
+        }
+    });
+
+    const eamilTextual = mailGenerator.generatePlaintext(options.mailgenContent);
+    const eamilHtml = mailGenerator.generate(options.mailgenContent);
+
+   const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    const mail = {
+        from: "varunkumarsaxena26@gmail.com",
+        to: options.to,
+        subject: options.subject,
+        text: eamilTextual,
+        html: eamilHtml
+    };
+    try {
+    await transporter.sendMail(mail);
+    } catch (error) {
+             console.error("Error sending email:", error);       
+        }
+}
 
 const emamilVerificationMailgenContent = (username, verificationURL) => {
     return {
@@ -37,4 +73,4 @@ const forgotPasswordMailgenContent = (username, passwordResetURL) => {
     }
 }
 
-export { emamilVerificationMailgenContent, forgotPasswordMailgenContent };
+export { emamilVerificationMailgenContent, forgotPasswordMailgenContent, sendEmail }
