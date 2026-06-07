@@ -19,7 +19,7 @@ const generatAccessandRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    const {username, email, password, role} = req.body;   
+    const {username, email, password, FullName, role} = req.body;   
 
     const existingUser = await User.findOne({ 
         $or: [{email}, {username}]  
@@ -29,7 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(409, "User with this email or username already exists");
      } 
 
-     const user = await User.create({username, email, password, role, isEmailVerified: false})
+     const user = await User.create({username, email, password, FullName, role, isEmailVerified: false})
 
      const {unhashedToken, hashedToken, tokenExpiry} = user.generateTemporaryToken();
 
