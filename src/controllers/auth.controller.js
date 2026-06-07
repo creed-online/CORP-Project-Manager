@@ -1,12 +1,12 @@
-import {user} from "../models/user-models.js";
+import {User} from "../models/user-models.js";
 import { ApiResponse } from "../utils/api-response.js";
 import asyncHandler from "../utils/async-handler.js";
 import {ApiError} from "../utils/api-error.js";
-import {sendEmail} from "../utils/mail.js";
+import {sendEmail, emamilVerificationMailgenContent} from "../utils/mail.js";
 
 const generatAccessandRefreshToken = async (userId) => {
     try {
-        const user = await user.findById(userId)
+        const user = await User.findById(userId)
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
         
