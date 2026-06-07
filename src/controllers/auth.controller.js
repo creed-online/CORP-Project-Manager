@@ -55,3 +55,5 @@ const registerUser = asyncHandler(async (req, res) => {
      return res.status(201).json(new ApiResponse(200, {user: createdUser}, "User registered successfully. Please check your email to verify your account."));
 
     });
+
+    export {registerUser};
