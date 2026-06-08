@@ -19,7 +19,7 @@ const userRegisterValidator = () => {
     body("password").trim().notEmpty().withMessage("Password is required"),
     body("FullName").trim().notEmpty().withMessage("FullName is required"),
   ];
-};
+}; 
 
 export {
   userRegisterValidator,

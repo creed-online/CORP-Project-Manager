@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -25,6 +26,8 @@ app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 // Static files
 app.use(express.static('public'));
 
+//cookie parser
+app.use(cookieParser());
 
 // import the routes
 import healthCheckRouter from './routes/healthCheck.routes.js';
