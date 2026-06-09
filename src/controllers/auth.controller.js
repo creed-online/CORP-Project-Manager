@@ -169,5 +169,40 @@ const registerUser = asyncHandler(async (req, res) => {
               "Email verified successfully. You can now login to your account.")); 
     })
 
+    const resendVerificationEmail = asyncHandler(async (req, res) => {
+        const user = await User.findById(req.user._id);
 
-    export {registerUser, login, logoutUser, getCurrentUser, verifyEmail};
+        if(!user) {
+            throw new ApiError(404, "User not found");
+        }
+        
+        if(user.isEmailVerified) {
+            throw new ApiError(400, "Email is already verified");
+        }
+
+
+     const {unhashedToken, hashedToken, tokenExpiry} = user.generateTemporaryToken();
+
+     user.emailVerificationToken = hashedToken;
+     user.emailVerificationExpiry = tokenExpiry;
+
+     await user.save({validateBeforeSave: false});
+
+     await sendEmail({
+        to: user?.email,
+        subject: "Email Verification - CORP",
+        mailgenContent: emamilVerificationMailgenContent(user.username, `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/$token=${unhashedToken}`),
+
+     });
+
+        // Logic for resending verification email would go here
+            return res
+            .status(200)
+            .json(new ApiResponse(
+                200,
+                {},
+                "Verification email resent successfully. Please check your email."
+            )); 
+    })
+
+    export {registerUser, login, logoutUser, getCurrentUser, verifyEmail, resendVerificationEmail};
