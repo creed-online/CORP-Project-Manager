@@ -4,7 +4,9 @@ import asyncHandler from "../utils/async-handler.js";
 import {ApiError} from "../utils/api-error.js";
 import {sendEmail, emamilVerificationMailgenContent} from "../utils/mail.js";
 import {verifyJWT} from "../middlewares/auth.middleware.js";
-
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import { cookie } from "express-validator";
 
 
 const generatAccessandRefreshToken = async (userId) => {
@@ -205,4 +207,48 @@ const registerUser = asyncHandler(async (req, res) => {
             )); 
     })
 
-    export {registerUser, login, logoutUser, getCurrentUser, verifyEmail, resendVerificationEmail};
+    const refreshAccessToken = asyncHandler(async (req, res) => {
+       const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+       if(!incomingRefreshToken) {
+        throw new ApiError(400, "Refresh token is missing");
+       }
+
+
+       try {
+
+        jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+        
+        const user = await UserfindById(decodedToken?._id)
+
+        if(!user) {
+            throw new ApiError(404, "Invalid refresh token");
+        }
+
+        if (incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError(401, "Refresh Token Expired");
+        }       
+
+        const options = {
+            httpOnly: true,
+            secure: true,
+        }
+
+        const {accessToken, refreshToken: newRefreshToken} = await generateAccessAndRefreshTokens(user._id);
+
+        user.refreshToken = newRefreshToken;
+        await user.save({validateBeforeSave: false});
+
+        return res.status(200) 
+        cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
+        .json(new ApiResponse(200, {accessToken, refreshToken: newRefreshToken}, "Access token refreshed successfully"));
+
+       }
+       catch (error) {      
+          throw new ApiError(401, "Invalid refresh token");
+       }
+
+    })
+
+    export {registerUser, login, logoutUser, getCurrentUser, verifyEmail, resendVerificationEmail, refreshAccessToken};
