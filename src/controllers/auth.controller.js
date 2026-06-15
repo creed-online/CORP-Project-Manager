@@ -251,4 +251,43 @@ const registerUser = asyncHandler(async (req, res) => {
 
     })
 
-    export {registerUser, login, logoutUser, getCurrentUser, verifyEmail, resendVerificationEmail, refreshAccessToken};
+    const forgotPassword = asyncHandler(async (req, res) => {
+        const {email} = req.body;
+
+        const user = await User.findOne({email})
+
+        if(!user) {
+            throw new ApiError(404, "User not found with this email");
+        }
+
+        const {unhashedToken, hashedToken, tokenExpiry} = user.generateTemporaryToken();
+
+        user.forgotPasswordToken = hashedToken;
+        user.forgotPasswordExpiry = tokenExpiry;
+
+        await user.save({validateBeforeSave: false});
+
+        await sendEmail({
+            to: user?.email,
+            subject: "Password Reset - CORP",
+            mailgenContent: forgotPasswordMailgenContent(user.username, `${process.env.FORGOT_PASSWORD_URL}/$token=${unhashedToken}`),
+        });
+
+        return res
+            .status(200)
+            .json(new ApiResponse(
+                200,
+                {},
+                "Password reset email sent successfully. Please check your email."
+            ));
+    })
+
+    export {registerUser,
+            login,
+            logoutUser,
+            getCurrentUser, 
+            verifyEmail, 
+            resendVerificationEmail, 
+            refreshAccessToken,
+            forgotPassword,
+        };
