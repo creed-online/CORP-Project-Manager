@@ -6,8 +6,15 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
+//Unsecured Route
 router.route('/register').post(userRegisterValidator(), validate, registerUser);
 router.route('/login').post(userLoginValidator(), validate, login);
+router.route('/verify-email/:verificationToken')
+.get(verifyEmail);
+router.route('/refresh-token').post(refreshAccessToken);
+
+
+//Secure route
 router.route('/logout').post(verifyJWT, logoutUser);
 
 
