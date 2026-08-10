@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import {User} from "../models/user-models.js";
 import { ApiResponse } from "../utils/api-response.js";
 import asyncHandler from "../utils/async-handler.js";
@@ -8,7 +9,15 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
 
+const ensureDatabaseReady = () => {
+    if (mongoose.connection.readyState !== 1) {
+        throw new ApiError(503, "Database is currently unavailable. Please try again shortly.");
+    }
+};
+
 const generatAccessandRefreshToken = async (userId) => {
+    ensureDatabaseReady();
+
     try {
         const user = await User.findById(userId)
         const accessToken = user.generateAccessToken();
@@ -23,6 +32,8 @@ const generatAccessandRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
+    ensureDatabaseReady();
+
     const {username, email, password, FullName, role} = req.body;   
 
     const existingUser = await User.findOne({ 
@@ -62,6 +73,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
     const login = asyncHandler(async (req, res) => {
+        ensureDatabaseReady();
+
         const {email, password, username} = req.body;
 
         if(!email) {
@@ -99,6 +112,8 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     const logoutUser = asyncHandler(async (req, res) => {
+        ensureDatabaseReady();
+
         await User.findByIdAndUpdate(
             req.user._id, 
             {
@@ -122,6 +137,8 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     const getCurrentUser = asyncHandler(async (req, res) => {
+        ensureDatabaseReady();
+
         return res
         .status(200)
         .json(
@@ -134,6 +151,8 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     const verifyEmail = asyncHandler(async (req, res) => {
+        ensureDatabaseReady();
+
         const {verificationToken} = req.params
 
         if(!verificationToken) {
@@ -171,6 +190,8 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     const resendVerificationEmail = asyncHandler(async (req, res) => {
+        ensureDatabaseReady();
+
         const user = await User.findById(req.user._id);
 
         if(!user) {
@@ -207,6 +228,8 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     const refreshAccessToken = asyncHandler(async (req, res) => {
+       ensureDatabaseReady();
+
        const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
        if(!incomingRefreshToken) {
@@ -251,6 +274,8 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     const forgotPassword = asyncHandler(async (req, res) => {
+        ensureDatabaseReady();
+
         const {email} = req.body;
 
         const user = await User.findOne({email})
@@ -282,6 +307,8 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     const changeCurrentPassword = asyncHandler(async (req, res) => {
+        ensureDatabaseReady();
+
         const {oldPassword, newPassword} = req.body;
 
         const user = await User.findById(req.user._id);
@@ -305,6 +332,8 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     const resetForgotPassword = asyncHandler(async (req, res) => {
+        ensureDatabaseReady();
+
         const {resetToken} = req.params;
         const {password} = req.body;
 

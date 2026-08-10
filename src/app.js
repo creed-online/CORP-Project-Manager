@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { ApiResponse } from './utils/api-response.js';
 
 dotenv.config();
 
@@ -43,6 +44,15 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
+
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal server error";
+
+  res.status(statusCode).json(
+    new ApiResponse(statusCode, null, message)
+  );
+});
 
 // ======================
 // EXPORT
