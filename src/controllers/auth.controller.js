@@ -304,6 +304,40 @@ const registerUser = asyncHandler(async (req, res) => {
         ));
     })
 
+    const resetForgotPassword = asyncHandler(async (req, res) => {
+        const {resetToken} = req.params;
+        const {password} = req.body;
+
+        if (!resetToken) {
+            throw new ApiError(400, "Reset token is missing");
+        }
+
+        if (!password) {
+            throw new ApiError(400, "New password is required");
+        }
+
+        const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+        const user = await User.findOne({
+            forgotPasswordToken: hashedToken,
+            forgotPasswordTokenExpiry: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            throw new ApiError(400, "Invalid or expired reset token");
+        }
+
+        user.password = password;
+        user.forgotPasswordToken = undefined;
+        user.forgotPasswordTokenExpiry = undefined;
+
+        await user.save({ validateBeforeSave: false });
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, {}, "Password reset successfully"));
+    })
+
     export {registerUser,
             login,
             logoutUser,
@@ -312,5 +346,6 @@ const registerUser = asyncHandler(async (req, res) => {
             resendVerificationEmail, 
             refreshAccessToken,
             forgotPassword,
-            changeCurrentPassword
+            changeCurrentPassword,
+            resetForgotPassword
         };
