@@ -5,62 +5,51 @@ import {ProjectMember} from "../models/projectmember.models.js";
 import { ApiResponse } from "../utils/api-response.js";
 import asyncHandler from "../utils/async-handler.js";
 import {ApiError} from "../utils/api-error.js";
-import {sendEmail, emamilVerificationMailgenContent, forgotPasswordMailgenContent} from "../utils/mail.js";
-import {verifyJWT} from "../middlewares/auth.middleware.js";
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
-import mongoose from "mongoose";
+import { UseRolesEnum } from "../utils/constants.js";
 
-
-const getProjects = asyncHandler(async(req, res) => {
+const getProjects = asyncHandler(async (req, res) => {
     const projects = await ProjectMember.aggregate([
         {
             $match: {
                 user: new mongoose.Types.ObjectId(req.user._id)
-            },
+            }
         },
-            $lookup({
+        {
+            $lookup: {
                 from: "projects",
                 localField: "project",
                 foreignField: "_id",
-                as: "projectDetails",
-                pipeline: [
-                    {
-                        $project: {
-                            from: projectMembers,
-                            localField: "_id",
-                            foreignField: "projects",
-                            as: "ProjectMembers",
-                        }
-                    },
-                    {
-                        $addFields: {
-                            memberCount: { $size: "$ProjectMembers" }
-                        }
-                    },
-                    {
-                        $unwind: "$projectDetails"
-                    },
-                    {
-                        $project: {
-                            _id: 1,
-                            name: 1,
-                            description: 1,
-                            memberCount: 1,
-                            createdAt: 1,
-                            createdBy: 1
-                        },
-                        role: 1,
-                        _id: 0
-                    }
-                ]
-            })
+                as: "projectDetails"
+            }
+        },
+        { $unwind: "$projectDetails" },
+        {
+            $lookup: {
+                from: "projectmembers",
+                localField: "projectDetails._id",
+                foreignField: "project",
+                as: "projectMembers"
+            }
+        },
+        {
+            $addFields: {
+                memberCount: { $size: "$projectMembers" }
+            }
+        },
+        {
+            $project: {
+                _id: "$projectDetails._id",
+                name: "$projectDetails.name",
+                description: "$projectDetails.description",
+                memberCount: 1,
+                createdAt: "$projectDetails.createdAt",
+                createdBy: "$projectDetails.createdBy",
+                role: "$role"
+            }
+        }
     ]);
 
-    return res
-    .status(200)
-    .json(new ApiResponse(200, projects, "Projects fetched successfully"));
-
+    return res.status(200).json(new ApiResponse(200, projects, "Projects fetched successfully"));
 });
 
 const getProjectById = asyncHandler(async(req, res) => {
@@ -78,7 +67,7 @@ const createProject = asyncHandler(async(req, res) => {
     await ProjectMember.create({
         project: new mongoose.Types.ObjectId(project._id),
         user: new mongoose.Types.ObjectId(req.user._id),
-        role: UserRolesEnum.ADMIN
+        role: UseRolesEnum.ADMIN
     })
 
     return res
