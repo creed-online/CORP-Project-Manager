@@ -5,7 +5,7 @@ import {ProjectMember} from "../models/projectmember.models.js";
 import { ApiResponse } from "../utils/api-response.js";
 import asyncHandler from "../utils/async-handler.js";
 import {ApiError} from "../utils/api-error.js";
-import { UseRolesEnum } from "../utils/constants.js";
+import { UseRolesEnum, AvailableRoles } from "../utils/constants.js";
 
 const getProjects = asyncHandler(async (req, res) => {
     const projects = await ProjectMember.aggregate([
@@ -71,7 +71,7 @@ const createProject = asyncHandler(async(req, res) => {
    const project = await Project.create({ 
     name, 
     description,
-     createdBy: new mongoose.Types.ObjectId(req.user.id) });
+     createdBy: new mongoose.Types.ObjectId(req.user._id) });
 
     await ProjectMember.create({
         project: new mongoose.Types.ObjectId(project._id),
@@ -123,7 +123,7 @@ const addMemberToProject = asyncHandler(async(req, res) => {
         throw new ApiError(404, "User not found");
     }   
     
-    await ProjectMember.findByIdAndUpdate({
+    await ProjectMember.findOneAndUpdate({
         project: new mongoose.Types.ObjectId(projectId),
         user: new mongoose.Types.ObjectId(user._id),
     },
@@ -143,7 +143,7 @@ const addMemberToProject = asyncHandler(async(req, res) => {
 
 const getProjectMembers = asyncHandler(async(req, res) => {
     const {projectId} = req.params;
-    const project = await Project.findById(req.params);
+    const project = await Project.findById(projectId);
 
     if (!project) {
         throw new ApiError(404, "Project not found");
@@ -199,7 +199,7 @@ const updateMemberRole = asyncHandler(async(req, res) => {
     const {projectId, userId} = req.params;
     const {newRole} = req.body;
 
-    if(!AvailabelUserRole.includes(newRole)) {
+    if(!AvailableRoles.includes(newRole)) {
         throw new ApiError(400, "Invalid role");
     }
 
