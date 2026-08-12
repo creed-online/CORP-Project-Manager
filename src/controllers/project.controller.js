@@ -13,7 +13,54 @@ import mongoose from "mongoose";
 
 
 const getProjects = asyncHandler(async(req, res) => {
-//test
+    const projects = await ProjectMember.aggregate([
+        {
+            $match: {
+                user: new mongoose.Types.ObjectId(req.user._id)
+            },
+        },
+            $lookup({
+                from: "projects",
+                localField: "project",
+                foreignField: "_id",
+                as: "projectDetails",
+                pipeline: [
+                    {
+                        $project: {
+                            from: projectMembers,
+                            localField: "_id",
+                            foreignField: "projects",
+                            as: "ProjectMembers",
+                        }
+                    },
+                    {
+                        $addFields: {
+                            memberCount: { $size: "$ProjectMembers" }
+                        }
+                    },
+                    {
+                        $unwind: "$projectDetails"
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            name: 1,
+                            description: 1,
+                            memberCount: 1,
+                            createdAt: 1,
+                            createdBy: 1
+                        },
+                        role: 1,
+                        _id: 0
+                    }
+                ]
+            })
+    ]);
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, projects, "Projects fetched successfully"));
+
 });
 
 const getProjectById = asyncHandler(async(req, res) => {
