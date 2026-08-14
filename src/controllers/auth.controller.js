@@ -52,12 +52,12 @@ const registerUser = asyncHandler(async (req, res) => {
      user.emailVerificationExpiry = tokenExpiry;
 
      await user.save({validateBeforeSave: false});
-     await sendEmail({
-        to: user?.email,
-        subject: "Email Verification - CORP",
-        mailgenContent: emamilVerificationMailgenContent(user.username, `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/$token=${unhashedToken}`),
+      await sendEmail({
+          to: user?.email,
+          subject: "Email Verification - CORP",
+          mailgenContent: emamilVerificationMailgenContent(user.username, `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email/${unhashedToken}`),
 
-     });
+      });
 
      const createdUser = await User.findById(user._id).select(
         "-password -refreshToken -forgotPasswordToken -forgotPasswordTokenExpiry -emailVerificationToken -emailVerificationTokenExpiry"
@@ -214,12 +214,12 @@ const registerUser = asyncHandler(async (req, res) => {
 
      await user.save({validateBeforeSave: false});
 
-     await sendEmail({
-        to: user?.email,
-        subject: "Email Verification - CORP",
-        mailgenContent: emamilVerificationMailgenContent(user.username, `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/$token=${unhashedToken}`),
+      await sendEmail({
+          to: user?.email,
+          subject: "Email Verification - CORP",
+          mailgenContent: emamilVerificationMailgenContent(user.username, `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email/${unhashedToken}`),
 
-     });
+      });
 
         // Logic for resending verification email would go here
             return res
