@@ -4,7 +4,7 @@
 
 ### 1. Product Overview
 
-**Product Name:** Project Camp Backend  
+**Product Name:** CORP Project Manager
 **Version:** 1.0.0  
 **Product Type:** Backend API for Project Management System
 

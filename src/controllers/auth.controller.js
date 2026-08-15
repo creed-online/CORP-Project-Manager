@@ -48,8 +48,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
      const {unhashedToken, hashedToken, tokenExpiry} = user.generateTemporaryToken();
 
-     user.emailVerificationToken = hashedToken;
-     user.emailVerificationExpiry = tokenExpiry;
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationTokenExpiry = tokenExpiry;
 
      await user.save({validateBeforeSave: false});
       await sendEmail({
@@ -63,11 +63,16 @@ const registerUser = asyncHandler(async (req, res) => {
         "-password -refreshToken -forgotPasswordToken -forgotPasswordTokenExpiry -emailVerificationToken -emailVerificationTokenExpiry"
      );
 
-     if(!createdUser) {
-        throw new ApiError(500, "something went wrong while creating user");
-     }
+      if(!createdUser) {
+          throw new ApiError(500, "something went wrong while creating user");
+      }
 
-     return res.status(201).json(new ApiResponse(200, {user: createdUser}, "User registered successfully. Please check your email to verify your account."));
+      const responseData = { user: createdUser };
+      if (process.env.NODE_ENV !== 'production') {
+          responseData.verificationToken = unhashedToken;
+      }
+
+      return res.status(201).json(new ApiResponse(200, responseData, "User registered successfully. Please check your email to verify your account."));
 
     });
 
@@ -170,7 +175,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
         const user = await User.findOne({
             emailVerificationToken: hashedToken,
-            emailVerificationExpiry: {$gt: Date.now()},
+            emailVerificationTokenExpiry: {$gt: Date.now()},
         });
 
         if(!user) {
@@ -178,7 +183,7 @@ const registerUser = asyncHandler(async (req, res) => {
         }
 
         user.emailVerificationToken = undefined;
-        user.emailVerificationExpiry = undefined;
+        user.emailVerificationTokenExpiry = undefined;
 
         user.isEmailVerified = true;
         await user.save({validateBeforeSave: false});
@@ -209,8 +214,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
      const {unhashedToken, hashedToken, tokenExpiry} = user.generateTemporaryToken();
 
-     user.emailVerificationToken = hashedToken;
-     user.emailVerificationExpiry = tokenExpiry;
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationTokenExpiry = tokenExpiry;
 
      await user.save({validateBeforeSave: false});
 
@@ -221,12 +226,16 @@ const registerUser = asyncHandler(async (req, res) => {
 
       });
 
-        // Logic for resending verification email would go here
+        const resendData = {};
+        if (process.env.NODE_ENV !== 'production') {
+            resendData.verificationToken = unhashedToken;
+        }
+
             return res
             .status(200)
             .json(new ApiResponse(
                 200,
-                {},
+                resendData,
                 "Verification email resent successfully. Please check your email."
             )); 
     })
