@@ -14,7 +14,7 @@ const getTasks = asyncHandler(async (req, res) => {
 })
 
 const createTask = asyncHandler(async (req, res) => {
-    //test
+   const { title, description, assignedTo, status } = req.body;
 })
 
 const getTaskById = asyncHandler(async (req, res) => {
