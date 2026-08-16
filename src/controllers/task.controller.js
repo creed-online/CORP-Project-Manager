@@ -15,6 +15,7 @@ const getTasks = asyncHandler(async (req, res) => {
 
 const createTask = asyncHandler(async (req, res) => {
    const { title, description, assignedTo, status } = req.body;
+   const {projectId} = req.params;
 })
 
 const getTaskById = asyncHandler(async (req, res) => {
