@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 import mongoose from "mongoose";
-import {AvailableTaskStatus, taskStatusEnum} from "../utils/constants.js";
+import { AvailableTaskStatus, taskStatusEnum } from "../utils/constants.js";
 
 const taskSchema = new Schema({
     title: {
@@ -37,8 +37,9 @@ const taskSchema = new Schema({
             mimetype: String,
             size: Number
         }],
-        default: [] 
+        default: []
     }
-}, {timestamps: true});
+}, { timestamps: true });
 
-export const task = mongoose.model("Task", taskSchema); 
+export const Task = mongoose.model("Task", taskSchema);
+export default Task;

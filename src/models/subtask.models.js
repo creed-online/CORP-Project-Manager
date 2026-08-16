@@ -20,7 +20,7 @@ const subtaskSchema = new Schema({
         type: Boolean,
         default: false
     },
-   createdBy: {
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
@@ -30,6 +30,7 @@ const subtaskSchema = new Schema({
         ref: "Project",
         required: true
     }
-}, {timestamps: true});
+}, { timestamps: true });
 
-export const subtask = mongoose.model("Subtask", subtaskSchema); 
+export const Subtask = mongoose.model("Subtask", subtaskSchema);
+export default Subtask;

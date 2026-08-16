@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  addMembersToProject,
+  addMemberToProject,
   createProject,
   deleteMember,
   getProjects,
@@ -9,17 +9,17 @@ import {
   updateProject,
   deleteProject,
   updateMemberRole,
-} from "../controllers/project.controllers.js";
+} from "../controllers/project.controller.js";
 import { validate } from "../middlewares/validator.middleware.js";
 import {
   createProjectValidator,
-  addMembertoProjectValidator,
+  addMemberToProjectValidator,
 } from "../validators/index.js";
 import {
   verifyJWT,
   validateProjectPermission,
 } from "../middlewares/auth.middleware.js";
-import { AvailableUserRole, UserRolesEnum } from "../utils/constants.js";
+import { AvailableRoles, UseRolesEnum } from "../utils/constants.js";
 
 const router = Router();
 router.use(verifyJWT);
@@ -31,28 +31,28 @@ router
 
 router
   .route("/:projectId")
-  .get(validateProjectPermission(AvailableUserRole), getProjectById)
+  .get(validateProjectPermission(AvailableRoles), getProjectById)
   .put(
-    validateProjectPermission([UserRolesEnum.ADMIN]),
+    validateProjectPermission([UseRolesEnum.ADMIN]),
     createProjectValidator(),
     validate,
     updateProject,
   )
-  .delete(validateProjectPermission([UserRolesEnum.ADMIN]), deleteProject);
+  .delete(validateProjectPermission([UseRolesEnum.ADMIN]), deleteProject);
 
 router
   .route("/:projectId/members")
   .get(getProjectMembers)
   .post(
-    validateProjectPermission([UserRolesEnum.ADMIN]),
-    addMembertoProjectValidator(),
+    validateProjectPermission([UseRolesEnum.ADMIN]),
+    addMemberToProjectValidator(),
     validate,
-    addMembersToProject,
+    addMemberToProject,
   );
 
 router
   .route("/:projectId/members/:userId")
-  .put(validateProjectPermission([UserRolesEnum.ADMIN]), updateMemberRole)
-  .delete(validateProjectPermission([UserRolesEnum.ADMIN]), deleteMember);
+  .put(validateProjectPermission([UseRolesEnum.ADMIN]), updateMemberRole)
+  .delete(validateProjectPermission([UseRolesEnum.ADMIN]), deleteMember);
 
 export default router;
